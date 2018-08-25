@@ -375,10 +375,17 @@ public class SeamCarver {
 
     /**
      * must be vertically positioned
-     * just like percolation assume source vertex is implicit sitting above image
+     * assume source vertex is implicit sitting above image
      * all of the top-row pixels are adjacent to this source vertex
-     * assume the sink vertex as an explicit vertex sitting below image
-     * adjacent to all bottom-row pixels
+     * DFS post-order would:
+     *              - start from top left
+     *              - keep traversing directly downwards
+     *              - traverse downward right when unable to downward traverse
+     *              - shift top right
+     * DFS reverse-post order would:
+     *              - start from top right
+     *              - keep traversing downward right
+     *              - shift top left
      * @return sequence of indices for vertical seam
      */
     private int[] findSeam(){
@@ -404,7 +411,7 @@ public class SeamCarver {
         }
 
         // reverse DFS post-order => topological order
-        // moving diagonally to the right starting from the top right corner the push left
+        // moving diagonally to the right starting from the top right corner then push left
         for (int top = width() - 1; top >= 0; top--) {
             for (int depth = 0; depth < height() && depth + top < width(); depth++){
                 traverse(depth + top, depth);
@@ -416,6 +423,7 @@ public class SeamCarver {
         // capture remaining pixels
         for (int depth = 1; depth < height(); depth++) {
             for (int moveRight = 0; moveRight < width() && (depth + moveRight) < height(); moveRight++) {
+
                 traverse(moveRight, depth + moveRight);
             }
         }
