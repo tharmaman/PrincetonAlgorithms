@@ -47,7 +47,7 @@ public class SeamCarver {
             }
         }
 
-        // setting is transposed
+        // set as not transposed
         isTransposed = false;
     }
 
