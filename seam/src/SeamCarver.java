@@ -47,7 +47,7 @@ public class SeamCarver {
             }
         }
 
-        // set as not transposed
+        // setting is transposed
         isTransposed = false;
     }
 
@@ -374,8 +374,11 @@ public class SeamCarver {
 
 
     /**
-     * run find seam
      * must be vertically positioned
+     * just like percolation assume source vertex is implicit sitting above image
+     * all of the top-row pixels are adjacent to this source vertex
+     * assume the sink vertex as an explicit vertex sitting below image
+     * adjacent to all bottom-row pixels
      * @return sequence of indices for vertical seam
      */
     private int[] findSeam(){
@@ -394,15 +397,14 @@ public class SeamCarver {
             Arrays.fill(toFill, Integer.MAX_VALUE);
         }
 
-        // relax the top row
+        // relax the top row as default values for top border pixels
         for (int col = 0; col < width(); col++) {
-            distTo[col][0] = (double) 1000;
+            distTo[col][0] = 1000;
             edgeTo[col][0] = -1;
         }
 
-
         // reverse DFS post-order => topological order
-        // moving diagonally from the top right corner
+        // moving diagonally to the right starting from the top right corner the push left
         for (int top = width() - 1; top >= 0; top--) {
             for (int depth = 0; depth < height() && depth + top < width(); depth++){
                 traverse(depth + top, depth);
@@ -411,6 +413,7 @@ public class SeamCarver {
 
         // start at the second top row
         // visit pixels from the left side then move diagonally to the right
+        // capture remaining pixels
         for (int depth = 1; depth < height(); depth++) {
             for (int moveRight = 0; moveRight < width() && (depth + moveRight) < height(); moveRight++) {
                 traverse(moveRight, depth + moveRight);
@@ -424,8 +427,8 @@ public class SeamCarver {
         seam[height() - 1] = seamSink;
 
         // fill up seam line
-        for (int i = height() - 1; i > 0; i--) {
-            seam[i - 1] = edgeTo[seam[i]][i];
+        for (int row = height() - 1; row > 0; row--) {
+            seam[row - 1] = edgeTo[seam[row]][row];
         }
 
         // clean up seam variables
